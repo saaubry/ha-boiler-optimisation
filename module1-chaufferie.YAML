@@ -1,0 +1,50 @@
+# declaration of the pin for dallas temperature sensors
+dallas:
+  - pin: D1
+
+
+# Individual sensors   
+sensor:
+  - platform: dallas
+    address: 0xdb00000dbafe1028
+    name: "temp depart d'eau"
+
+  - platform: dallas
+    address: 0xdc00000dbb727828
+    name: "temp arrivee d'eau"
+  
+  - platform: dallas 
+    address: 0x6b01143fa055aa28
+    name: "temp du ballon" 
+
+switch:
+#declare the relay 
+  - platform: gpio
+    id: relais
+    name: "Relais chauffe eaux"
+    pin: D8
+    # at restart the relay must be open to let the boiler heat 
+    restore_mode: RESTORE_DEFAULT_OFF
+
+    
+# declare time source and timezone. Can work without internet but it will be les accurate
+time:
+  - platform: sntp
+    timezone: 'Europe/Prague'
+    id: sntp_time
+    
+#create to automation based on time of the day and month of the year May to October
+#at 22h29 from May to October - close the relay
+    on_time:
+      - minutes: 29
+        hours: 22
+        months: 5 - 10
+        then:
+          - switch.turn_on: relais
+
+# at 2h41 from May to October - open the relay
+      - minutes: 41
+        hours: 02
+        months: 5 - 10
+        then:
+          - switch.turn_off: relais
